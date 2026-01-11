@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: content-automation-platform
+    env: node
+    buildCommand: npm install
+    startCommand: node server-full.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /api/v1/health
