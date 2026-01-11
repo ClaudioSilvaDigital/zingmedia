@@ -711,7 +711,360 @@ app.get('/dashboard', (req, res) => {
             }
             
             function showFeature(feature) {
-                alert('Funcionalidade "' + feature + '" será implementada em breve!\\n\\nEsta é uma versão de demonstração da plataforma.');
+                if (feature === 'ai') {
+                    showAIConfig();
+                } else if (feature === 'settings') {
+                    showSocialConfig();
+                } else if (feature === 'content') {
+                    showContentCreator();
+                } else if (feature === 'analytics') {
+                    showPublishedPosts();
+                } else {
+                    alert('Funcionalidade "' + feature + '" será implementada em breve!\\n\\nEsta é uma versão de demonstração da plataforma.');
+                }
+            }
+            
+            function showAIConfig() {
+                const modal = createModal('Configurar IA', `
+                    <div style="margin-bottom: 20px;">
+                        <h3>🤖 Configuração de Provedores de IA</h3>
+                        <p>Configure suas chaves de API para gerar conteúdo automaticamente:</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label><strong>OpenAI (GPT-4):</strong></label>
+                        <input type="password" id="openai-key" placeholder="sk-..." style="width: 100%; padding: 8px; margin-top: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label><strong>Claude (Anthropic):</strong></label>
+                        <input type="password" id="claude-key" placeholder="sk-ant-..." style="width: 100%; padding: 8px; margin-top: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label><strong>Gemini (Google):</strong></label>
+                        <input type="password" id="gemini-key" placeholder="AIza..." style="width: 100%; padding: 8px; margin-top: 5px;">
+                    </div>
+                    
+                    <button onclick="saveAIConfig()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        Salvar Configurações
+                    </button>
+                `);
+                
+                // Carregar configurações existentes
+                loadAIConfig();
+            }
+            
+            function showSocialConfig() {
+                const modal = createModal('Configurar Redes Sociais', `
+                    <div style="margin-bottom: 20px;">
+                        <h3>📱 Credenciais das Redes Sociais</h3>
+                        <p>Configure os tokens de acesso para publicar automaticamente:</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label><strong>Instagram Access Token:</strong></label>
+                        <input type="password" id="instagram-token" placeholder="IGQVJ..." style="width: 100%; padding: 8px; margin-top: 5px;">
+                        <small style="color: #666;">Obtenha em: developers.facebook.com</small>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label><strong>Facebook Access Token:</strong></label>
+                        <input type="password" id="facebook-token" placeholder="EAAG..." style="width: 100%; padding: 8px; margin-top: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label><strong>LinkedIn Access Token:</strong></label>
+                        <input type="password" id="linkedin-token" placeholder="AQV..." style="width: 100%; padding: 8px; margin-top: 5px;">
+                    </div>
+                    
+                    <button onclick="saveSocialConfig()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        Salvar Credenciais
+                    </button>
+                `);
+                
+                loadSocialConfig();
+            }
+            
+            function showContentCreator() {
+                const modal = createModal('Criar Conteúdo', `
+                    <div style="margin-bottom: 20px;">
+                        <h3>✨ Gerador de Conteúdo com IA</h3>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label><strong>Prompt para IA:</strong></label>
+                        <textarea id="content-prompt" placeholder="Ex: Crie um post sobre os benefícios do marketing digital para pequenas empresas..." style="width: 100%; height: 80px; padding: 8px; margin-top: 5px;"></textarea>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label><strong>Plataforma:</strong></label>
+                        <select id="content-platform" style="width: 100%; padding: 8px; margin-top: 5px;">
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="linkedin">LinkedIn</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <button onclick="generateContent()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                            🤖 Gerar com IA
+                        </button>
+                        <button onclick="publishContent()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                            📱 Publicar Agora
+                        </button>
+                    </div>
+                    
+                    <div id="generated-content" style="margin-top: 20px;"></div>
+                `);
+            }
+            
+            function showPublishedPosts() {
+                const modal = createModal('Posts Publicados', `
+                    <div style="margin-bottom: 20px;">
+                        <h3>📊 Histórico de Publicações</h3>
+                        <button onclick="loadPublishedPosts()" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                            🔄 Atualizar
+                        </button>
+                    </div>
+                    
+                    <div id="posts-list">
+                        <p>Carregando posts...</p>
+                    </div>
+                `);
+                
+                loadPublishedPosts();
+            }
+            
+            function createModal(title, content) {
+                // Remove modal existente
+                const existingModal = document.getElementById('custom-modal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                const modal = document.createElement('div');
+                modal.id = 'custom-modal';
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(0,0,0,0.5); z-index: 1000; display: flex; 
+                    align-items: center; justify-content: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0;">${title}</h2>
+                            <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                        </div>
+                        ${content}
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                return modal;
+            }
+            
+            function closeModal() {
+                const modal = document.getElementById('custom-modal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+            
+            async function saveAIConfig() {
+                const openaiKey = document.getElementById('openai-key').value;
+                const claudeKey = document.getElementById('claude-key').value;
+                const geminiKey = document.getElementById('gemini-key').value;
+                
+                const token = localStorage.getItem('token');
+                
+                try {
+                    if (openaiKey) {
+                        await fetch('/api/v1/ai/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ provider: 'openai', apiKey: openaiKey, model: 'gpt-4' })
+                        });
+                    }
+                    
+                    if (claudeKey) {
+                        await fetch('/api/v1/ai/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ provider: 'claude', apiKey: claudeKey, model: 'claude-3-sonnet' })
+                        });
+                    }
+                    
+                    if (geminiKey) {
+                        await fetch('/api/v1/ai/config', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ provider: 'gemini', apiKey: geminiKey, model: 'gemini-pro' })
+                        });
+                    }
+                    
+                    alert('✅ Configurações de IA salvas com sucesso!');
+                    closeModal();
+                } catch (error) {
+                    alert('❌ Erro ao salvar configurações: ' + error.message);
+                }
+            }
+            
+            async function saveSocialConfig() {
+                const instagramToken = document.getElementById('instagram-token').value;
+                const facebookToken = document.getElementById('facebook-token').value;
+                const linkedinToken = document.getElementById('linkedin-token').value;
+                
+                const token = localStorage.getItem('token');
+                
+                try {
+                    if (instagramToken) {
+                        await fetch('/api/v1/social/credentials', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ platform: 'instagram', accessToken: instagramToken })
+                        });
+                    }
+                    
+                    if (facebookToken) {
+                        await fetch('/api/v1/social/credentials', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ platform: 'facebook', accessToken: facebookToken })
+                        });
+                    }
+                    
+                    if (linkedinToken) {
+                        await fetch('/api/v1/social/credentials', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                            body: JSON.stringify({ platform: 'linkedin', accessToken: linkedinToken })
+                        });
+                    }
+                    
+                    alert('✅ Credenciais das redes sociais salvas com sucesso!');
+                    closeModal();
+                } catch (error) {
+                    alert('❌ Erro ao salvar credenciais: ' + error.message);
+                }
+            }
+            
+            let generatedContentData = null;
+            
+            async function generateContent() {
+                const prompt = document.getElementById('content-prompt').value;
+                const platform = document.getElementById('content-platform').value;
+                
+                if (!prompt) {
+                    alert('Por favor, digite um prompt para gerar o conteúdo!');
+                    return;
+                }
+                
+                const token = localStorage.getItem('token');
+                
+                try {
+                    const response = await fetch('/api/v1/content/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ prompt, platform, contentType: 'post' })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        generatedContentData = result.content;
+                        document.getElementById('generated-content').innerHTML = `
+                            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: #f9f9f9;">
+                                <h4>✨ Conteúdo Gerado:</h4>
+                                <div style="white-space: pre-wrap; margin: 10px 0;">${result.content.text}</div>
+                                <p><strong>Hashtags:</strong> ${result.content.hashtags.join(' ')}</p>
+                                <p><strong>Plataforma:</strong> ${platform}</p>
+                            </div>
+                        `;
+                    } else {
+                        alert('❌ Erro ao gerar conteúdo: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao gerar conteúdo: ' + error.message);
+                }
+            }
+            
+            async function publishContent() {
+                if (!generatedContentData) {
+                    alert('Primeiro gere um conteúdo com IA!');
+                    return;
+                }
+                
+                const platform = document.getElementById('content-platform').value;
+                const token = localStorage.getItem('token');
+                
+                try {
+                    const response = await fetch('/api/v1/content/publish', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ 
+                            content: generatedContentData, 
+                            platforms: [platform],
+                            scheduledTime: null 
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const publishResult = result.results[0];
+                        if (publishResult.status === 'success') {
+                            alert(`✅ Conteúdo publicado com sucesso no ${platform}!\\n\\nPost ID: ${publishResult.postId}`);
+                        } else {
+                            alert(`❌ Erro na publicação: ${publishResult.error}`);
+                        }
+                    } else {
+                        alert('❌ Erro ao publicar: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao publicar: ' + error.message);
+                }
+            }
+            
+            async function loadPublishedPosts() {
+                const token = localStorage.getItem('token');
+                
+                try {
+                    const response = await fetch('/api/v1/content/posts', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    
+                    const posts = await response.json();
+                    
+                    if (posts.length === 0) {
+                        document.getElementById('posts-list').innerHTML = '<p>Nenhum post publicado ainda.</p>';
+                        return;
+                    }
+                    
+                    const postsHtml = posts.map(post => `
+                        <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <strong>${post.platform.toUpperCase()}</strong>
+                                <span style="color: #666; font-size: 0.9em;">${new Date(post.publishedAt).toLocaleString()}</span>
+                            </div>
+                            <div style="margin: 10px 0;">${post.content.substring(0, 150)}${post.content.length > 150 ? '...' : ''}</div>
+                            <div style="color: #667eea; font-size: 0.9em;">ID: ${post.id}</div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('posts-list').innerHTML = postsHtml;
+                } catch (error) {
+                    document.getElementById('posts-list').innerHTML = '<p>❌ Erro ao carregar posts: ' + error.message + '</p>';
+                }
+            }
+            
+            async function loadAIConfig() {
+                // Implementar carregamento das configurações existentes se necessário
+            }
+            
+            async function loadSocialConfig() {
+                // Implementar carregamento das credenciais existentes se necessário
             }
             
             // Carregar dashboard quando a página carregar
@@ -741,6 +1094,11 @@ app.use('/dashboard', (req, res, next) => {
   });
 });
 
+// Simulação de banco de dados para configurações
+const aiConfigs = new Map();
+const socialCredentials = new Map();
+const contentPosts = [];
+
 // API Routes protegidas
 app.get('/api/v1/user/profile', authenticateToken, (req, res) => {
   const user = users.find(u => u.id === req.user.id);
@@ -760,6 +1118,123 @@ app.get('/api/v1/user/profile', authenticateToken, (req, res) => {
       brandConfig: tenant.brandConfig
     }
   });
+});
+
+// Configurações de IA
+app.get('/api/v1/ai/config', authenticateToken, (req, res) => {
+  const config = aiConfigs.get(req.user.tenantId) || {
+    openai: { apiKey: '', model: 'gpt-4' },
+    claude: { apiKey: '', model: 'claude-3-sonnet' },
+    gemini: { apiKey: '', model: 'gemini-pro' }
+  };
+  
+  res.json(config);
+});
+
+app.post('/api/v1/ai/config', authenticateToken, (req, res) => {
+  const { provider, apiKey, model } = req.body;
+  
+  let config = aiConfigs.get(req.user.tenantId) || {};
+  config[provider] = { apiKey, model };
+  aiConfigs.set(req.user.tenantId, config);
+  
+  res.json({ success: true, message: `${provider} configurado com sucesso!` });
+});
+
+// Credenciais das redes sociais
+app.get('/api/v1/social/credentials', authenticateToken, (req, res) => {
+  const credentials = socialCredentials.get(req.user.tenantId) || {
+    instagram: { accessToken: '', appId: '', appSecret: '' },
+    facebook: { accessToken: '', appId: '', appSecret: '' },
+    linkedin: { accessToken: '', clientId: '', clientSecret: '' },
+    tiktok: { accessToken: '', appId: '', appSecret: '' }
+  };
+  
+  res.json(credentials);
+});
+
+app.post('/api/v1/social/credentials', authenticateToken, (req, res) => {
+  const { platform, accessToken, appId, appSecret, clientId, clientSecret } = req.body;
+  
+  let credentials = socialCredentials.get(req.user.tenantId) || {};
+  credentials[platform] = { 
+    accessToken, 
+    appId: appId || clientId, 
+    appSecret: appSecret || clientSecret 
+  };
+  socialCredentials.set(req.user.tenantId, credentials);
+  
+  res.json({ success: true, message: `${platform} configurado com sucesso!` });
+});
+
+// Geração de conteúdo com IA
+app.post('/api/v1/content/generate', authenticateToken, (req, res) => {
+  const { prompt, platform, contentType } = req.body;
+  
+  // Simulação de geração de conteúdo
+  const generatedContent = {
+    text: `🚀 Conteúdo gerado para ${platform}!\n\n${prompt}\n\n✨ Este é um exemplo de conteúdo criado pela IA do ZingMedia. Em produção, aqui seria usado o ${contentType} real com base no prompt fornecido.\n\n#ZingMedia #AutomaçãoDeConteúdo #IA`,
+    hashtags: ['#ZingMedia', '#AutomaçãoDeConteúdo', '#IA', '#SocialMedia'],
+    suggestedTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 horas a partir de agora
+    platforms: [platform]
+  };
+  
+  res.json({ success: true, content: generatedContent });
+});
+
+// Publicação de conteúdo
+app.post('/api/v1/content/publish', authenticateToken, (req, res) => {
+  const { content, platforms, scheduledTime } = req.body;
+  
+  // Verificar se tem credenciais configuradas
+  const credentials = socialCredentials.get(req.user.tenantId);
+  if (!credentials) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Configure as credenciais das redes sociais primeiro!' 
+    });
+  }
+  
+  // Simular publicação
+  const publishResults = platforms.map(platform => {
+    const hasCredentials = credentials[platform] && credentials[platform].accessToken;
+    
+    if (!hasCredentials) {
+      return {
+        platform,
+        status: 'failed',
+        error: `Credenciais do ${platform} não configuradas`
+      };
+    }
+    
+    // Simular sucesso na publicação
+    const postId = `${platform}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    contentPosts.push({
+      id: postId,
+      platform,
+      content: content.text,
+      publishedAt: scheduledTime || new Date().toISOString(),
+      tenantId: req.user.tenantId,
+      userId: req.user.id
+    });
+    
+    return {
+      platform,
+      status: 'success',
+      postId,
+      url: `https://${platform}.com/p/${postId}`,
+      publishedAt: scheduledTime || new Date().toISOString()
+    };
+  });
+  
+  res.json({ success: true, results: publishResults });
+});
+
+// Listar posts publicados
+app.get('/api/v1/content/posts', authenticateToken, (req, res) => {
+  const tenantPosts = contentPosts.filter(post => post.tenantId === req.user.tenantId);
+  res.json(tenantPosts);
 });
 
 app.get('/api/v1/health', (req, res) => {
