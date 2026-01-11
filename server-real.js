@@ -24,7 +24,7 @@ const users = [
   {
     id: '1',
     email: 'admin@zingmedia.com',
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+    password: '$2a$10$6fJDhRnEp5LuqAcXfarbgukaMty5hBmNUb3ZufT/UHLROQCTvMit.', // password
     name: 'Administrador ZingMedia',
     role: 'admin',
     tenantId: 'platform-tenant'
@@ -32,7 +32,7 @@ const users = [
   {
     id: '2',
     email: 'agency@example.com',
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+    password: '$2a$10$6fJDhRnEp5LuqAcXfarbgukaMty5hBmNUb3ZufT/UHLROQCTvMit.', // password
     name: 'Agência Demo',
     role: 'agency_admin',
     tenantId: 'agency-demo'
@@ -40,7 +40,7 @@ const users = [
   {
     id: '3',
     email: 'user@example.com',
-    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+    password: '$2a$10$6fJDhRnEp5LuqAcXfarbgukaMty5hBmNUb3ZufT/UHLROQCTvMit.', // password
     name: 'Usuário Demo',
     role: 'user',
     tenantId: 'agency-demo'
