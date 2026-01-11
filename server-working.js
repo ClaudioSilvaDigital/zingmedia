@@ -822,6 +822,7 @@ app.get('/dashboard', (req, res) => {
 
             function openFeature(featureId) {
                 switch(featureId) {
+                    // Social Media Manager
                     case 'briefings':
                         showBriefingInterface();
                         break;
@@ -837,6 +838,60 @@ app.get('/dashboard', (req, res) => {
                     case 'download':
                         showDownloadInterface();
                         break;
+                    case 'publish':
+                        showPublishInterface();
+                        break;
+                    
+                    // Platform Admin
+                    case 'ai-config':
+                        showGlobalAIConfigInterface();
+                        break;
+                    case 'tenants':
+                        showAgenciesManagementInterface();
+                        break;
+                    case 'billing-admin':
+                        showGlobalBillingInterface();
+                        break;
+                    case 'analytics-global':
+                        showGlobalAnalyticsInterface();
+                        break;
+                    
+                    // Agency Admin
+                    case 'white-label':
+                        showWhiteLabelInterface();
+                        break;
+                    case 'clients':
+                        showClientsManagementInterface();
+                        break;
+                    case 'users':
+                        showUsersManagementInterface();
+                        break;
+                    case 'analytics':
+                        showAgencyAnalyticsInterface();
+                        break;
+                    case 'billing':
+                        showAgencyBillingInterface();
+                        break;
+                    
+                    // Client Approver
+                    case 'approval':
+                        showApprovalInterface();
+                        break;
+                    case 'content-view':
+                        showContentViewInterface();
+                        break;
+                    case 'comments':
+                        showCommentsInterface();
+                        break;
+                    
+                    // Viewer
+                    case 'content-readonly':
+                        showReadOnlyContentInterface();
+                        break;
+                    case 'calendar-readonly':
+                        showReadOnlyCalendarInterface();
+                        break;
+                    
                     default:
                         alert(\`✅ Funcionalidade "\${featureId}" do Sistema Real v2.0!\\n\\n🎯 Esta é uma demonstração do RBAC implementado.\\n\\n👤 Seu perfil (\${currentUser.role}) tem acesso a esta funcionalidade.\\n\\n🚀 O Sistema Real está funcionando corretamente!\`);
                 }
@@ -1401,6 +1456,1036 @@ app.get('/dashboard', (req, res) => {
                     alert('❌ Erro ao atualizar workflow: ' + error.message);
                 }
             }
+
+            // ===== INTERFACES PARA PLATFORM ADMIN =====
+            
+            function showGlobalAIConfigInterface() {
+                showModal('🤖 Configuração Global de IA', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Configuração Global dos Provedores de IA</h4>
+                        <p>Configure os provedores de IA para toda a plataforma ZingMedia.</p>
+                    </div>
+                    
+                    <form id="globalAIForm">
+                        <div class="form-group">
+                            <label>Provedor Principal:</label>
+                            <select id="primaryProvider" required>
+                                <option value="openai">OpenAI (GPT-4)</option>
+                                <option value="claude">Anthropic Claude</option>
+                                <option value="gemini">Google Gemini</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>API Key OpenAI:</label>
+                            <input type="password" id="openaiKey" placeholder="sk-...">
+                        </div>
+                        <div class="form-group">
+                            <label>API Key Claude:</label>
+                            <input type="password" id="claudeKey" placeholder="sk-ant-...">
+                        </div>
+                        <div class="form-group">
+                            <label>API Key Gemini:</label>
+                            <input type="password" id="geminiKey" placeholder="AIza...">
+                        </div>
+                        <div class="form-group">
+                            <label>Limite de Tokens por Agência/Mês:</label>
+                            <input type="number" id="tokenLimit" value="100000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Custo por 1K Tokens (R$):</label>
+                            <input type="number" step="0.01" id="tokenCost" value="0.05" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Salvar Configuração Global</button>
+                    </form>
+                \`);
+                
+                document.getElementById('globalAIForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await saveGlobalAIConfig();
+                });
+            }
+
+            function showAgenciesManagementInterface() {
+                showModal('🏢 Gestão de Agências', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Gestão de Todas as Agências</h4>
+                        <p>Gerencie todas as agências da plataforma ZingMedia.</p>
+                    </div>
+                    
+                    <div id="agenciesList">
+                        <h5>Agências Cadastradas:</h5>
+                        <div id="agenciesContainer">Carregando...</div>
+                    </div>
+                    
+                    <hr style="margin: 20px 0;">
+                    
+                    <h5>Cadastrar Nova Agência:</h5>
+                    <form id="agencyForm">
+                        <div class="form-group">
+                            <label>Nome da Agência:</label>
+                            <input type="text" id="agencyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email do Administrador:</label>
+                            <input type="email" id="agencyEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Plano:</label>
+                            <select id="agencyPlan" required>
+                                <option value="starter">Starter - R$ 297/mês</option>
+                                <option value="professional">Professional - R$ 597/mês</option>
+                                <option value="enterprise">Enterprise - R$ 1.297/mês</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Cadastrar Agência</button>
+                    </form>
+                \`);
+                
+                loadAgencies();
+                
+                document.getElementById('agencyForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await createAgency();
+                });
+            }
+
+            function showGlobalBillingInterface() {
+                showModal('💰 Billing Global', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Gestão de Billing da Plataforma</h4>
+                        <p>Gerencie planos, créditos e faturamento de todas as agências.</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h5>📊 Resumo Financeiro:</h5>
+                            <div id="billingStats">Carregando...</div>
+                        </div>
+                        <div>
+                            <h5>📈 Métricas de Crescimento:</h5>
+                            <div id="growthStats">Carregando...</div>
+                        </div>
+                    </div>
+                \`);
+                
+                loadGlobalBillingStats();
+            }
+
+            function showGlobalAnalyticsInterface() {
+                showModal('📊 Analytics Global', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Analytics da Plataforma</h4>
+                        <p>Relatórios e métricas de toda a plataforma ZingMedia.</p>
+                    </div>
+                    
+                    <div id="globalAnalytics">Carregando analytics...</div>
+                \`);
+                
+                loadGlobalAnalytics();
+            }
+
+            // ===== INTERFACES PARA AGENCY ADMIN =====
+            
+            function showWhiteLabelInterface() {
+                showModal('🎨 Configuração White-Label', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Personalização da Marca</h4>
+                        <p>Configure a identidade visual da sua agência na plataforma.</p>
+                    </div>
+                    
+                    <form id="whitelabelForm">
+                        <div class="form-group">
+                            <label>Nome da Empresa:</label>
+                            <input type="text" id="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cor Primária:</label>
+                            <input type="color" id="primaryColor" value="#667eea" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cor Secundária:</label>
+                            <input type="color" id="secondaryColor" value="#764ba2" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Domínio Personalizado:</label>
+                            <input type="text" id="customDomain" placeholder="suaagencia.zingmedia.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Logo da Empresa:</label>
+                            <input type="file" id="logoFile" accept="image/*">
+                        </div>
+                        <button type="submit" class="btn-primary">Salvar Configuração</button>
+                    </form>
+                    
+                    <div id="whitelabelPreview" style="margin-top: 20px;">
+                        <h5>🔍 Preview:</h5>
+                        <div id="previewContainer" style="border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                            Preview será exibido aqui...
+                        </div>
+                    </div>
+                \`);
+                
+                loadWhitelabelConfig();
+                
+                document.getElementById('whitelabelForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await saveWhitelabelConfig();
+                });
+            }
+
+            function showClientsManagementInterface() {
+                showModal('👥 Gestão de Clientes', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Gestão de Clientes da Agência</h4>
+                        <p>Gerencie todos os clientes da sua agência.</p>
+                    </div>
+                    
+                    <div id="clientsList">
+                        <h5>Clientes Cadastrados:</h5>
+                        <div id="clientsContainer">Carregando...</div>
+                    </div>
+                    
+                    <hr style="margin: 20px 0;">
+                    
+                    <h5>Cadastrar Novo Cliente:</h5>
+                    <form id="clientForm">
+                        <div class="form-group">
+                            <label>Nome do Cliente:</label>
+                            <input type="text" id="clientName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email de Contato:</label>
+                            <input type="email" id="clientEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Segmento:</label>
+                            <select id="clientIndustry" required>
+                                <option value="">Selecione...</option>
+                                <option value="tecnologia">Tecnologia</option>
+                                <option value="saude">Saúde</option>
+                                <option value="educacao">Educação</option>
+                                <option value="varejo">Varejo</option>
+                                <option value="servicos">Serviços</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Cadastrar Cliente</button>
+                    </form>
+                \`);
+                
+                loadClients();
+                
+                document.getElementById('clientForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await createClient();
+                });
+            }
+
+            function showUsersManagementInterface() {
+                showModal('👤 Gestão de Usuários', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Gestão de Usuários da Agência</h4>
+                        <p>Gerencie todos os usuários e permissões da sua agência.</p>
+                    </div>
+                    
+                    <div id="usersList">
+                        <h5>Usuários Cadastrados:</h5>
+                        <div id="usersContainer">Carregando...</div>
+                    </div>
+                    
+                    <hr style="margin: 20px 0;">
+                    
+                    <h5>Cadastrar Novo Usuário:</h5>
+                    <form id="userForm">
+                        <div class="form-group">
+                            <label>Nome Completo:</label>
+                            <input type="text" id="userName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="userEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Perfil:</label>
+                            <select id="userRole" required>
+                                <option value="">Selecione...</option>
+                                <option value="social_media_manager">Social Media Manager</option>
+                                <option value="client_approver">Client Approver</option>
+                                <option value="viewer">Viewer</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Cadastrar Usuário</button>
+                    </form>
+                \`);
+                
+                loadUsers();
+                
+                document.getElementById('userForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await createUser();
+                });
+            }
+
+            function showAgencyAnalyticsInterface() {
+                showModal('📈 Analytics da Agência', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Analytics da Sua Agência</h4>
+                        <p>Relatórios e métricas dos seus clientes.</p>
+                    </div>
+                    
+                    <div id="agencyAnalytics">Carregando analytics...</div>
+                \`);
+                
+                loadAgencyAnalytics();
+            }
+
+            function showAgencyBillingInterface() {
+                showModal('💳 Billing da Agência', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Gestão de Assinatura e Nota Fiscal</h4>
+                        <p>Gerencie sua assinatura e emita notas fiscais.</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h5>📋 Plano Atual:</h5>
+                            <div id="currentPlan">Carregando...</div>
+                        </div>
+                        <div>
+                            <h5>🧾 Notas Fiscais:</h5>
+                            <div id="invoices">Carregando...</div>
+                        </div>
+                    </div>
+                \`);
+                
+                loadAgencyBilling();
+            }
+
+            // ===== INTERFACES PARA CLIENT APPROVER =====
+            
+            function showApprovalInterface() {
+                showModal('✅ Aprovação de Conteúdo', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Conteúdos Pendentes de Aprovação</h4>
+                        <p>Aprove ou solicite ajustes nos conteúdos criados.</p>
+                    </div>
+                    
+                    <div id="pendingApprovals">Carregando conteúdos...</div>
+                \`);
+                
+                loadPendingApprovals();
+            }
+
+            function showContentViewInterface() {
+                showModal('👁️ Visualizar Conteúdo', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Visualização de Conteúdo</h4>
+                        <p>Visualize todos os conteúdos em diferentes estados.</p>
+                    </div>
+                    
+                    <div id="contentView">Carregando conteúdos...</div>
+                \`);
+                
+                loadContentForApprover();
+            }
+
+            function showCommentsInterface() {
+                showModal('💬 Comentários e Solicitações', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Sistema de Comentários</h4>
+                        <p>Adicione comentários e solicitações de ajustes.</p>
+                    </div>
+                    
+                    <form id="commentForm">
+                        <div class="form-group">
+                            <label>Selecionar Conteúdo:</label>
+                            <select id="contentSelect" required>
+                                <option value="">Carregando conteúdos...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Comentário:</label>
+                            <select id="commentType" required>
+                                <option value="">Selecione...</option>
+                                <option value="approval">Aprovação</option>
+                                <option value="adjustment">Solicitação de Ajuste</option>
+                                <option value="feedback">Feedback Geral</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Comentário:</label>
+                            <textarea id="commentText" required placeholder="Digite seu comentário ou solicitação..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">Enviar Comentário</button>
+                    </form>
+                \`);
+                
+                loadContentForComments();
+                
+                document.getElementById('commentForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await submitComment();
+                });
+            }
+
+            // ===== INTERFACES PARA VIEWER =====
+            
+            function showReadOnlyContentInterface() {
+                showModal('👁️ Visualização de Conteúdo', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Conteúdos (Somente Leitura)</h4>
+                        <p>Visualize todos os conteúdos criados (sem permissão de edição).</p>
+                    </div>
+                    
+                    <div id="readonlyContent">Carregando conteúdos...</div>
+                \`);
+                
+                loadReadOnlyContent();
+            }
+
+            function showReadOnlyCalendarInterface() {
+                showModal('📅 Calendário Editorial', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Calendário Editorial (Somente Leitura)</h4>
+                        <p>Visualize o calendário de publicações (sem permissão de edição).</p>
+                    </div>
+                    
+                    <div id="readonlyCalendar">Carregando calendário...</div>
+                \`);
+                
+                loadReadOnlyCalendar();
+            }
+
+            function showPublishInterface() {
+                showModal('📱 Publicar Conteúdo', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Publicação nas Redes Sociais</h4>
+                        <p>Publique conteúdo aprovado nas redes sociais.</p>
+                    </div>
+                    
+                    <form id="publishForm">
+                        <div class="form-group">
+                            <label>Conteúdo Aprovado:</label>
+                            <select id="approvedContent" required>
+                                <option value="">Carregando conteúdos aprovados...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Plataformas:</label>
+                            <div>
+                                <label><input type="checkbox" value="instagram"> Instagram</label>
+                                <label><input type="checkbox" value="facebook"> Facebook</label>
+                                <label><input type="checkbox" value="linkedin"> LinkedIn</label>
+                                <label><input type="checkbox" value="tiktok"> TikTok</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Agendar Publicação:</label>
+                            <input type="datetime-local" id="scheduleTime">
+                            <small>Deixe em branco para publicar imediatamente</small>
+                        </div>
+                        <button type="submit" class="btn-primary">Publicar Agora</button>
+                    </form>
+                \`);
+                
+                loadApprovedContentForPublish();
+                
+                document.getElementById('publishForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await publishContent();
+                });
+            }
+
+            // ===== FUNÇÕES DE CARREGAMENTO DE DADOS =====
+            
+            async function saveGlobalAIConfig() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const data = {
+                        provider: 'global',
+                        config: {
+                            primaryProvider: document.getElementById('primaryProvider').value,
+                            openaiKey: document.getElementById('openaiKey').value,
+                            claudeKey: document.getElementById('claudeKey').value,
+                            geminiKey: document.getElementById('geminiKey').value,
+                            tokenLimit: parseInt(document.getElementById('tokenLimit').value),
+                            tokenCost: parseFloat(document.getElementById('tokenCost').value)
+                        }
+                    };
+                    
+                    const response = await fetch('/api/v1/platform/ai-config', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Configuração global de IA salva com sucesso!');
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao salvar configuração: ' + error.message);
+                }
+            }
+
+            async function loadAgencies() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/platform/agencies', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const agencies = await response.json();
+                    
+                    const container = document.getElementById('agenciesContainer');
+                    if (agencies.length === 0) {
+                        container.innerHTML = '<p>Nenhuma agência cadastrada ainda.</p>';
+                    } else {
+                        container.innerHTML = agencies.map(a => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                <h6>\${a.name}</h6>
+                                <p><strong>Email:</strong> \${a.email}</p>
+                                <p><strong>Plano:</strong> \${a.plan}</p>
+                                <p><strong>Status:</strong> \${a.status}</p>
+                                <p><strong>Usuários:</strong> \${a.users} | <strong>Clientes:</strong> \${a.clients}</p>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar agências:', error);
+                }
+            }
+
+            async function createAgency() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const data = {
+                        name: document.getElementById('agencyName').value,
+                        email: document.getElementById('agencyEmail').value,
+                        plan: document.getElementById('agencyPlan').value
+                    };
+                    
+                    const response = await fetch('/api/v1/platform/agencies', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Agência cadastrada com sucesso!');
+                        loadAgencies();
+                        document.getElementById('agencyForm').reset();
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao cadastrar agência: ' + error.message);
+                }
+            }
+
+            async function loadGlobalAnalytics() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/platform/analytics', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const analytics = await response.json();
+                    
+                    document.getElementById('globalAnalytics').innerHTML = \`
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalAgencies}</h3>
+                                <p>Agências Ativas</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalUsers}</h3>
+                                <p>Usuários Totais</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">R$ \${analytics.revenue}</h3>
+                                <p>Receita Mensal</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalContent}</h3>
+                                <p>Conteúdos Gerados</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalAssets}</h3>
+                                <p>Assets Criados</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #48bb78;">\${analytics.growth}</h3>
+                                <p>Crescimento</p>
+                            </div>
+                        </div>
+                    \`;
+                } catch (error) {
+                    console.error('Erro ao carregar analytics:', error);
+                }
+            }
+
+            async function loadGlobalBillingStats() {
+                document.getElementById('billingStats').innerHTML = \`
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <p><strong>Receita Total:</strong> R$ 8.910,00</p>
+                        <p><strong>Agências Ativas:</strong> 30</p>
+                        <p><strong>Taxa de Conversão:</strong> 85%</p>
+                        <p><strong>Churn Rate:</strong> 3%</p>
+                    </div>
+                \`;
+                
+                document.getElementById('growthStats').innerHTML = \`
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <p><strong>Crescimento MoM:</strong> +15%</p>
+                        <p><strong>Novos Clientes:</strong> 8</p>
+                        <p><strong>Upgrades:</strong> 5</p>
+                        <p><strong>LTV Médio:</strong> R$ 3.564,00</p>
+                    </div>
+                \`;
+            }
+
+            // Implementar outras funções de carregamento conforme necessário...
+            async function loadWhitelabelConfig() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/agency/whitelabel', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const config = await response.json();
+                    
+                    document.getElementById('companyName').value = config.companyName || '';
+                    document.getElementById('primaryColor').value = config.primaryColor || '#667eea';
+                    document.getElementById('secondaryColor').value = config.secondaryColor || '#764ba2';
+                    document.getElementById('customDomain').value = config.domain || '';
+                } catch (error) {
+                    console.error('Erro ao carregar configuração:', error);
+                }
+            }
+            
+            async function saveWhitelabelConfig() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const data = {
+                        companyName: document.getElementById('companyName').value,
+                        primaryColor: document.getElementById('primaryColor').value,
+                        secondaryColor: document.getElementById('secondaryColor').value,
+                        domain: document.getElementById('customDomain').value
+                    };
+                    
+                    const response = await fetch('/api/v1/agency/whitelabel', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Configuração white-label salva com sucesso!');
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao salvar configuração: ' + error.message);
+                }
+            }
+            
+            async function loadClients() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/agency/clients', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const clients = await response.json();
+                    
+                    const container = document.getElementById('clientsContainer');
+                    if (clients.length === 0) {
+                        container.innerHTML = '<p>Nenhum cliente cadastrado ainda.</p>';
+                    } else {
+                        container.innerHTML = clients.map(c => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                <h6>\${c.name}</h6>
+                                <p><strong>Email:</strong> \${c.email}</p>
+                                <p><strong>Segmento:</strong> \${c.industry}</p>
+                                <p><strong>Status:</strong> \${c.status}</p>
+                                <p><strong>Projetos:</strong> \${c.projects}</p>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar clientes:', error);
+                }
+            }
+            
+            async function createClient() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const data = {
+                        name: document.getElementById('clientName').value,
+                        email: document.getElementById('clientEmail').value,
+                        industry: document.getElementById('clientIndustry').value
+                    };
+                    
+                    const response = await fetch('/api/v1/agency/clients', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Cliente cadastrado com sucesso!');
+                        loadClients();
+                        document.getElementById('clientForm').reset();
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao cadastrar cliente: ' + error.message);
+                }
+            }
+            
+            async function loadUsers() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/agency/users', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const users = await response.json();
+                    
+                    const container = document.getElementById('usersContainer');
+                    if (users.length === 0) {
+                        container.innerHTML = '<p>Nenhum usuário cadastrado ainda.</p>';
+                    } else {
+                        container.innerHTML = users.map(u => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                <h6>\${u.name}</h6>
+                                <p><strong>Email:</strong> \${u.email}</p>
+                                <p><strong>Perfil:</strong> \${u.role}</p>
+                                <p><strong>Criado em:</strong> \${new Date(u.createdAt).toLocaleString()}</p>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar usuários:', error);
+                }
+            }
+            
+            async function createUser() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const data = {
+                        name: document.getElementById('userName').value,
+                        email: document.getElementById('userEmail').value,
+                        role: document.getElementById('userRole').value
+                    };
+                    
+                    const response = await fetch('/api/v1/agency/users', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Usuário cadastrado com sucesso! Senha padrão: password');
+                        loadUsers();
+                        document.getElementById('userForm').reset();
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao cadastrar usuário: ' + error.message);
+                }
+            }
+            
+            async function loadAgencyAnalytics() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/agency/analytics', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const analytics = await response.json();
+                    
+                    document.getElementById('agencyAnalytics').innerHTML = \`
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalClients}</h3>
+                                <p>Clientes Ativos</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalUsers}</h3>
+                                <p>Usuários</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">R$ \${analytics.monthlyRevenue}</h3>
+                                <p>Receita Mensal</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalContent}</h3>
+                                <p>Conteúdos Gerados</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #667eea;">\${analytics.totalAssets}</h3>
+                                <p>Assets Criados</p>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h3 style="color: #48bb78;">\${analytics.clientSatisfaction}</h3>
+                                <p>Satisfação</p>
+                            </div>
+                        </div>
+                    \`;
+                } catch (error) {
+                    console.error('Erro ao carregar analytics:', error);
+                }
+            }
+            
+            async function loadAgencyBilling() {
+                document.getElementById('currentPlan').innerHTML = \`
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <p><strong>Plano:</strong> Professional</p>
+                        <p><strong>Valor:</strong> R$ 597,00/mês</p>
+                        <p><strong>Próximo Vencimento:</strong> 15/02/2026</p>
+                        <p><strong>Status:</strong> <span style="color: #48bb78;">Ativo</span></p>
+                    </div>
+                \`;
+                
+                document.getElementById('invoices').innerHTML = \`
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                        <p><strong>Janeiro 2026:</strong> R$ 597,00 - <a href="#" onclick="alert('Download da NF iniciado!')">Download NF</a></p>
+                        <p><strong>Dezembro 2025:</strong> R$ 597,00 - <a href="#" onclick="alert('Download da NF iniciado!')">Download NF</a></p>
+                        <p><strong>Novembro 2025:</strong> R$ 597,00 - <a href="#" onclick="alert('Download da NF iniciado!')">Download NF</a></p>
+                    </div>
+                \`;
+            }
+            
+            async function loadPendingApprovals() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/approval/pending', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const pending = await response.json();
+                    
+                    const container = document.getElementById('pendingApprovals');
+                    if (pending.length === 0) {
+                        container.innerHTML = '<p>Nenhum conteúdo pendente de aprovação.</p>';
+                    } else {
+                        container.innerHTML = pending.map(w => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                <h6>Workflow: \${w.id}</h6>
+                                <p><strong>Conteúdo:</strong> \${w.content.text.substring(0, 150)}...</p>
+                                <p><strong>Hashtags:</strong> \${w.content.hashtags.join(', ')}</p>
+                                <p><strong>Criado em:</strong> \${new Date(w.createdAt).toLocaleString()}</p>
+                                <div style="margin-top: 10px;">
+                                    <button onclick="approveContent('\${w.id}')" class="btn-success" style="margin: 5px;">✅ Aprovar</button>
+                                    <button onclick="requestChanges('\${w.id}')" class="btn-warning" style="margin: 5px;">🔄 Solicitar Ajustes</button>
+                                </div>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar aprovações:', error);
+                }
+            }
+            
+            async function loadContentForApprover() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/workflows', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const workflows = await response.json();
+                    
+                    const container = document.getElementById('contentView');
+                    if (workflows.length === 0) {
+                        container.innerHTML = '<p>Nenhum conteúdo encontrado.</p>';
+                    } else {
+                        container.innerHTML = workflows.map(w => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                <h6>Workflow: \${w.id}</h6>
+                                <p><strong>Estado:</strong> \${w.state}</p>
+                                <p><strong>Conteúdo:</strong> \${w.content.text}</p>
+                                <p><strong>Hashtags:</strong> \${w.content.hashtags.join(', ')}</p>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar conteúdo:', error);
+                }
+            }
+            
+            async function loadContentForComments() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/workflows', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const workflows = await response.json();
+                    
+                    const select = document.getElementById('contentSelect');
+                    select.innerHTML = '<option value="">Selecione um conteúdo...</option>';
+                    workflows.forEach(w => {
+                        select.innerHTML += \`<option value="\${w.id}">Workflow \${w.id} - \${w.state}</option>\`;
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar conteúdo:', error);
+                }
+            }
+            
+            async function submitComment() {
+                const contentId = document.getElementById('contentSelect').value;
+                const commentType = document.getElementById('commentType').value;
+                const commentText = document.getElementById('commentText').value;
+                
+                if (commentType === 'approval') {
+                    await approveContent(contentId, commentText);
+                } else if (commentType === 'adjustment') {
+                    await requestChanges(contentId, commentText);
+                } else {
+                    alert('✅ Comentário enviado: ' + commentText);
+                }
+            }
+            
+            async function loadReadOnlyContent() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/content/readonly', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const content = await response.json();
+                    
+                    const container = document.getElementById('readonlyContent');
+                    if (content.length === 0) {
+                        container.innerHTML = '<p>Nenhum conteúdo encontrado.</p>';
+                    } else {
+                        container.innerHTML = content.map(w => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; opacity: 0.8;">
+                                <h6>📄 Workflow: \${w.id}</h6>
+                                <p><strong>Estado:</strong> \${w.state}</p>
+                                <p><strong>Conteúdo:</strong> \${w.content.text}</p>
+                                <p><strong>Hashtags:</strong> \${w.content.hashtags.join(', ')}</p>
+                                <p><em>👁️ Visualização somente leitura</em></p>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar conteúdo:', error);
+                }
+            }
+            
+            async function loadReadOnlyCalendar() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/calendar/readonly', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const events = await response.json();
+                    
+                    const container = document.getElementById('readonlyCalendar');
+                    if (events.length === 0) {
+                        container.innerHTML = '<p>Nenhum evento no calendário.</p>';
+                    } else {
+                        container.innerHTML = events.map(e => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; opacity: 0.8;">
+                                <h6>📅 \${e.title}</h6>
+                                <p><strong>Data:</strong> \${new Date(e.date).toLocaleString()}</p>
+                                <p><strong>Estado:</strong> \${e.state}</p>
+                                <p><em>👁️ Visualização somente leitura</em></p>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar calendário:', error);
+                }
+            }
+            
+            async function loadApprovedContentForPublish() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/workflows', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const workflows = await response.json();
+                    
+                    const approvedWorkflows = workflows.filter(w => w.state === 'ready_for_download');
+                    const select = document.getElementById('approvedContent');
+                    select.innerHTML = '<option value="">Selecione conteúdo aprovado...</option>';
+                    approvedWorkflows.forEach(w => {
+                        select.innerHTML += \`<option value="\${w.id}">Workflow \${w.id} - \${w.content.text.substring(0, 50)}...</option>\`;
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar conteúdo aprovado:', error);
+                }
+            }
+            
+            async function publishContent() {
+                const contentId = document.getElementById('approvedContent').value;
+                const platforms = Array.from(document.querySelectorAll('#publishForm input[type="checkbox"]:checked')).map(cb => cb.value);
+                const scheduleTime = document.getElementById('scheduleTime').value;
+                
+                if (!contentId || platforms.length === 0) {
+                    alert('❌ Selecione um conteúdo e pelo menos uma plataforma');
+                    return;
+                }
+                
+                const message = scheduleTime ? 
+                    \`✅ Conteúdo agendado para \${new Date(scheduleTime).toLocaleString()} nas plataformas: \${platforms.join(', ')}\` :
+                    \`✅ Conteúdo publicado imediatamente nas plataformas: \${platforms.join(', ')}\`;
+                
+                alert(message);
+                document.getElementById('publishForm').reset();
+            }
+            
+            async function approveContent(workflowId, comment = '') {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(\`/api/v1/approval/\${workflowId}/approve\`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ comment })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ ' + result.message);
+                        loadPendingApprovals();
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao aprovar conteúdo: ' + error.message);
+                }
+            }
+            
+            async function requestChanges(workflowId, comment = '') {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(\`/api/v1/approval/\${workflowId}/request-changes\`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ comment })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ ' + result.message);
+                        loadPendingApprovals();
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao solicitar ajustes: ' + error.message);
+                }
+            }
         </script>
     </body>
     </html>
@@ -1714,4 +2799,285 @@ app.get('/api/v1/sessions/:id', authenticateToken, (req, res) => {
     return res.status(404).json({ error: 'Sessão não encontrada' });
   }
   res.json(session);
+});
+// ===== DADOS ADICIONAIS PARA TODOS OS PERFIS =====
+
+const agencies = [];
+const clients = [];
+const platformUsers = [];
+const whitelabelConfigs = new Map();
+const billingPlans = [];
+const analyticsData = [];
+const approvalRequests = [];
+const platformSettings = {
+  globalAIConfig: {},
+  systemSettings: {},
+  platformAnalytics: {}
+};
+
+// ===== APIs PARA PLATFORM ADMIN =====
+
+app.get('/api/v1/platform/agencies', authenticateToken, (req, res) => {
+  if (req.user.role !== 'platform_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  res.json(agencies);
+});
+
+app.post('/api/v1/platform/agencies', authenticateToken, (req, res) => {
+  if (req.user.role !== 'platform_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const { name, email, plan } = req.body;
+  const agency = {
+    id: `agency_${Date.now()}`,
+    name,
+    email,
+    plan,
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    users: 0,
+    clients: 0
+  };
+  
+  agencies.push(agency);
+  res.json({ success: true, agency });
+});
+
+app.get('/api/v1/platform/analytics', authenticateToken, (req, res) => {
+  if (req.user.role !== 'platform_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const analytics = {
+    totalAgencies: agencies.length,
+    totalUsers: users.length,
+    totalContent: contentWorkflows.length,
+    totalAssets: creativeAssets.length,
+    revenue: agencies.length * 297, // Simulado
+    growth: '+15%' // Simulado
+  };
+  
+  res.json(analytics);
+});
+
+app.post('/api/v1/platform/ai-config', authenticateToken, (req, res) => {
+  if (req.user.role !== 'platform_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const { provider, config } = req.body;
+  platformSettings.globalAIConfig[provider] = {
+    ...config,
+    updatedAt: new Date().toISOString(),
+    updatedBy: req.user.id
+  };
+  
+  res.json({ success: true, message: `Configuração global do ${provider} atualizada` });
+});
+
+// ===== APIs PARA AGENCY ADMIN =====
+
+app.get('/api/v1/agency/clients', authenticateToken, (req, res) => {
+  if (req.user.role !== 'agency_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const agencyClients = clients.filter(c => c.agencyId === req.user.tenantId);
+  res.json(agencyClients);
+});
+
+app.post('/api/v1/agency/clients', authenticateToken, (req, res) => {
+  if (req.user.role !== 'agency_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const { name, email, industry } = req.body;
+  const client = {
+    id: `client_${Date.now()}`,
+    name,
+    email,
+    industry,
+    agencyId: req.user.tenantId,
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    projects: 0
+  };
+  
+  clients.push(client);
+  res.json({ success: true, client });
+});
+
+app.get('/api/v1/agency/users', authenticateToken, (req, res) => {
+  if (req.user.role !== 'agency_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const agencyUsers = users.filter(u => u.tenantId === req.user.tenantId);
+  res.json(agencyUsers);
+});
+
+app.post('/api/v1/agency/users', authenticateToken, (req, res) => {
+  if (req.user.role !== 'agency_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const { name, email, role } = req.body;
+  const newUser = {
+    id: `user_${Date.now()}`,
+    name,
+    email,
+    role,
+    tenantId: req.user.tenantId,
+    password: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password padrão
+    permissions: role === 'social_media_manager' ? ['create_briefing', 'generate_content'] : ['view_content'],
+    createdAt: new Date().toISOString()
+  };
+  
+  users.push(newUser);
+  res.json({ success: true, user: newUser });
+});
+
+app.get('/api/v1/agency/whitelabel', authenticateToken, (req, res) => {
+  if (req.user.role !== 'agency_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const config = whitelabelConfigs.get(req.user.tenantId) || {
+    primaryColor: '#667eea',
+    secondaryColor: '#764ba2',
+    logo: null,
+    companyName: 'Sua Agência',
+    domain: null
+  };
+  
+  res.json(config);
+});
+
+app.post('/api/v1/agency/whitelabel', authenticateToken, (req, res) => {
+  if (req.user.role !== 'agency_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const config = req.body;
+  whitelabelConfigs.set(req.user.tenantId, {
+    ...config,
+    updatedAt: new Date().toISOString()
+  });
+  
+  res.json({ success: true, message: 'Configuração white-label atualizada' });
+});
+
+app.get('/api/v1/agency/analytics', authenticateToken, (req, res) => {
+  if (req.user.role !== 'agency_admin') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const agencyAnalytics = {
+    totalClients: clients.filter(c => c.agencyId === req.user.tenantId).length,
+    totalUsers: users.filter(u => u.tenantId === req.user.tenantId).length,
+    totalContent: contentWorkflows.filter(w => w.tenantId === req.user.tenantId).length,
+    totalAssets: creativeAssets.filter(a => a.tenantId === req.user.tenantId).length,
+    monthlyRevenue: 2970, // Simulado
+    clientSatisfaction: '95%' // Simulado
+  };
+  
+  res.json(agencyAnalytics);
+});
+
+// ===== APIs PARA CLIENT APPROVER =====
+
+app.get('/api/v1/approval/pending', authenticateToken, (req, res) => {
+  if (req.user.role !== 'client_approver') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const pendingApprovals = contentWorkflows.filter(w => 
+    w.tenantId === req.user.tenantId && w.state === 'approval'
+  );
+  
+  res.json(pendingApprovals);
+});
+
+app.post('/api/v1/approval/:workflowId/approve', authenticateToken, (req, res) => {
+  if (req.user.role !== 'client_approver') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const { workflowId } = req.params;
+  const { comment } = req.body;
+  
+  const workflowIndex = contentWorkflows.findIndex(w => 
+    w.id === workflowId && w.tenantId === req.user.tenantId
+  );
+  
+  if (workflowIndex === -1) {
+    return res.status(404).json({ error: 'Workflow não encontrado' });
+  }
+  
+  contentWorkflows[workflowIndex].state = 'ready_for_download';
+  contentWorkflows[workflowIndex].history.push({
+    state: 'ready_for_download',
+    timestamp: new Date().toISOString(),
+    userId: req.user.id,
+    comment: comment || 'Conteúdo aprovado'
+  });
+  
+  res.json({ success: true, message: 'Conteúdo aprovado com sucesso!' });
+});
+
+app.post('/api/v1/approval/:workflowId/request-changes', authenticateToken, (req, res) => {
+  if (req.user.role !== 'client_approver') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const { workflowId } = req.params;
+  const { comment } = req.body;
+  
+  const workflowIndex = contentWorkflows.findIndex(w => 
+    w.id === workflowId && w.tenantId === req.user.tenantId
+  );
+  
+  if (workflowIndex === -1) {
+    return res.status(404).json({ error: 'Workflow não encontrado' });
+  }
+  
+  contentWorkflows[workflowIndex].state = 'adjustments';
+  contentWorkflows[workflowIndex].history.push({
+    state: 'adjustments',
+    timestamp: new Date().toISOString(),
+    userId: req.user.id,
+    comment: comment || 'Solicitação de ajustes'
+  });
+  
+  res.json({ success: true, message: 'Ajustes solicitados com sucesso!' });
+});
+
+// ===== APIs PARA VIEWER =====
+
+app.get('/api/v1/content/readonly', authenticateToken, (req, res) => {
+  if (req.user.role !== 'viewer') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const readonlyContent = contentWorkflows.filter(w => w.tenantId === req.user.tenantId);
+  res.json(readonlyContent);
+});
+
+app.get('/api/v1/calendar/readonly', authenticateToken, (req, res) => {
+  if (req.user.role !== 'viewer') {
+    return res.status(403).json({ error: 'Acesso negado' });
+  }
+  
+  const calendarEvents = contentWorkflows
+    .filter(w => w.tenantId === req.user.tenantId)
+    .map(w => ({
+      id: w.id,
+      title: `Conteúdo: ${w.content.text.substring(0, 30)}...`,
+      date: w.createdAt,
+      state: w.state
+    }));
+  
+  res.json(calendarEvents);
 });
