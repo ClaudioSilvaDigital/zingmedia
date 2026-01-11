@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "node server-minimal.js",
+    "startCommand": "node server-complete.js",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 60,
     "restartPolicyType": "ON_FAILURE",
