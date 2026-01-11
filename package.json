@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "echo 'No build step required for production server'",
-    "start": "node server-full.js",
+    "start": "node server-real.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "test": "vitest --run",
     "test:watch": "vitest",
