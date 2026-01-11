@@ -1,4 +1,4 @@
-# Dockerfile para Content Automation Platform
+# Dockerfile para ZingMedia
 FROM node:18-alpine
 
 # Instalar dependências do sistema

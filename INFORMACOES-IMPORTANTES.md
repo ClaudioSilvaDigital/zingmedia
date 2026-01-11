@@ -1,4 +1,4 @@
-# ℹ️ Informações Importantes - Content Automation Platform
+# ℹ️ Informações Importantes - ZingMedia
 
 ## 🔐 **Segurança**
 

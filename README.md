@@ -1,13 +1,26 @@
-# Content Automation Platform
+# 🚀 ZingMedia
 
-A comprehensive AI-powered multi-tenant SaaS platform for automating content creation, approval workflows, and multi-platform publishing.
+**Plataforma SaaS de Automação Inteligente de Conteúdo Multi-Plataforma**
 
-## Features
+ZingMedia é uma plataforma AI-first, multi-tenant que automatiza completamente a criação, aprovação e publicação de conteúdo em redes sociais (Instagram, TikTok, Facebook, LinkedIn), com intervenção humana apenas para aprovação e ajustes.
 
-- **Multi-Tenant Architecture**: Hierarchical tenancy with complete data isolation (Platform > Agency > Client)
-- **White-Label Customization**: Complete brand customization per agency
-- **AI Integration Hub**: Unified interface for multiple AI providers
-- **Workflow Management**: 9-state editorial workflow with approval processes
+## ✨ Funcionalidades
+
+- **🏢 Arquitetura Multi-Tenant**: Isolamento completo de dados (Plataforma > Agência > Cliente)
+- **🎨 White-Label**: Personalização completa da marca por agência
+- **🤖 Hub de IA**: Interface unificada para múltiplos provedores de IA
+- **📋 Gestão de Workflow**: Fluxo editorial com 9 estados e processos de aprovação
+- **📱 Publicação Multi-Plataforma**: Instagram, TikTok, Facebook, LinkedIn
+- **📊 Analytics Avançado**: Métricas e recomendações automáticas
+- **🔒 Segurança & Compliance**: LGPD, criptografia, auditoria completa
+- **💰 Sistema de Billing**: Créditos, assinaturas, Nota Fiscal brasileira
+
+## 🚀 Demonstração Online
+
+**Contas de teste:**
+- **Admin:** admin@contentplatform.com / password
+- **Agência:** agency@example.com / password  
+- **Usuário:** user@example.com / password
 - **Multi-Platform Publishing**: Automated publishing to Instagram, TikTok, Facebook, LinkedIn
 - **Role-Based Access Control**: Granular permissions system
 - **Analytics & Performance Tracking**: Comprehensive metrics and optimization

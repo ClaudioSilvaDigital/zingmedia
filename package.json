@@ -1,7 +1,7 @@
 {
-  "name": "content-automation-platform",
+  "name": "zingmedia",
   "version": "1.0.0",
-  "description": "AI-powered multi-tenant content automation platform",
+  "description": "ZingMedia - Plataforma SaaS de Automação Inteligente de Conteúdo Multi-Plataforma",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -48,6 +48,7 @@
     "vitest": "^1.0.4"
   },
   "keywords": [
+    "zingmedia",
     "content-automation",
     "ai",
     "social-media",

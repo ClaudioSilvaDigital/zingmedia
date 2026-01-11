@@ -92,7 +92,7 @@ app.get('/', (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Content Automation Platform - Login</title>
+        <title>ZingMedia - Login</title>
         <style>
             * {
                 margin: 0;
@@ -229,7 +229,7 @@ app.get('/', (req, res) => {
     <body>
         <div class="login-container">
             <div class="logo">
-                <h1>🚀 Content Platform</h1>
+                <h1>🚀 ZingMedia</h1>
                 <p>Automação Inteligente de Conteúdo</p>
             </div>
             
@@ -367,7 +367,7 @@ app.get('/dashboard', (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Dashboard - Content Platform</title>
+        <title>Dashboard - ZingMedia</title>
         <style>
             * {
                 margin: 0;
@@ -566,7 +566,7 @@ app.get('/dashboard', (req, res) => {
         <div class="header" id="header">
             <div class="header-content">
                 <div class="logo">
-                    <h1 id="companyName">🚀 Content Platform</h1>
+                    <h1 id="companyName">🚀 ZingMedia</h1>
                 </div>
                 <div class="user-info">
                     <span class="role-badge" id="userRole">user</span>
@@ -778,7 +778,7 @@ app.get('/api/v1/health', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   if (NODE_ENV === 'development') {
     console.log(`
-🚀 Content Automation Platform (Versão Completa) está rodando!
+🚀 ZingMedia (Versão Completa) está rodando!
 
 📍 URL: http://localhost:${PORT}
 🌐 Para acessar de outros dispositivos: http://${getLocalIP()}:${PORT}
@@ -792,7 +792,7 @@ app.listen(PORT, '0.0.0.0', () => {
 ✨ Abra seu navegador e faça login para acessar o dashboard!
     `);
   } else {
-    console.log(`🚀 Content Automation Platform rodando na porta ${PORT}`);
+    console.log(`🚀 ZingMedia rodando na porta ${PORT}`);
   }
 });
 

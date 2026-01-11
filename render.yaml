@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: content-automation-platform
+    name: zingmedia
     env: node
     buildCommand: npm install
     startCommand: node server-full.js
