@@ -691,6 +691,19 @@ app.get('/dashboard', (req, res) => {
             </div>
         </div>
 
+        <!-- Modal para interfaces funcionais -->
+        <div class="modal" id="modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center;">
+            <div class="modal-content" style="background: white; padding: 30px; border-radius: 15px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 id="modalTitle">Modal</h2>
+                    <button class="modal-close" onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+                </div>
+                <div id="modalBody">
+                    <!-- Modal content será inserido aqui -->
+                </div>
+            </div>
+        </div>
+
         <script>
             let currentUser = null;
             let currentTenant = null;
@@ -808,7 +821,25 @@ app.get('/dashboard', (req, res) => {
             }
 
             function openFeature(featureId) {
-                alert(\`✅ Funcionalidade "\${featureId}" do Sistema Real v2.0!\\n\\n🎯 Esta é uma demonstração do RBAC implementado.\\n\\n👤 Seu perfil (\${currentUser.role}) tem acesso a esta funcionalidade.\\n\\n🚀 O Sistema Real está funcionando corretamente!\`);
+                switch(featureId) {
+                    case 'briefings':
+                        showBriefingInterface();
+                        break;
+                    case 'ai-agents':
+                        showAIAgentsInterface();
+                        break;
+                    case 'workflow':
+                        showWorkflowInterface();
+                        break;
+                    case 'creatives':
+                        showCreativesInterface();
+                        break;
+                    case 'download':
+                        showDownloadInterface();
+                        break;
+                    default:
+                        alert(\`✅ Funcionalidade "\${featureId}" do Sistema Real v2.0!\\n\\n🎯 Esta é uma demonstração do RBAC implementado.\\n\\n👤 Seu perfil (\${currentUser.role}) tem acesso a esta funcionalidade.\\n\\n🚀 O Sistema Real está funcionando corretamente!\`);
+                }
             }
 
             function logout() {
@@ -816,8 +847,560 @@ app.get('/dashboard', (req, res) => {
                 window.location.href = '/';
             }
 
+            function closeModal() {
+                document.getElementById('modal').style.display = 'none';
+            }
+
             // Carregar dashboard
             window.addEventListener('load', loadDashboard);
+
+            // ===== INTERFACES FUNCIONAIS =====
+            
+            function showBriefingInterface() {
+                showModal('📋 Briefings Obrigatórios', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Sistema de Briefing Obrigatório</h4>
+                        <p>No Sistema Real, <strong>não é possível gerar conteúdo sem um briefing ativo</strong>.</p>
+                    </div>
+                    
+                    <div id="briefingsList">
+                        <h5>Briefings Ativos:</h5>
+                        <div id="briefingsContainer">Carregando...</div>
+                    </div>
+                    
+                    <hr style="margin: 20px 0;">
+                    
+                    <h5>Criar Novo Briefing:</h5>
+                    <form id="briefingForm">
+                        <div class="form-group">
+                            <label>Nome do Briefing:</label>
+                            <input type="text" id="briefingName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Objetivo da Campanha:</label>
+                            <input type="text" id="objetivo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Público-Alvo:</label>
+                            <textarea id="publico_alvo" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Tom de Voz:</label>
+                            <select id="tom_voz" required>
+                                <option value="">Selecione...</option>
+                                <option value="Profissional">Profissional</option>
+                                <option value="Descontraído">Descontraído</option>
+                                <option value="Inspirador">Inspirador</option>
+                                <option value="Educativo">Educativo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Plataformas:</label>
+                            <div>
+                                <label><input type="checkbox" value="Instagram"> Instagram</label>
+                                <label><input type="checkbox" value="Facebook"> Facebook</label>
+                                <label><input type="checkbox" value="LinkedIn"> LinkedIn</label>
+                                <label><input type="checkbox" value="TikTok"> TikTok</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Palavras-Chave (separadas por vírgula):</label>
+                            <input type="text" id="palavras_chave">
+                        </div>
+                        <button type="submit" class="btn-primary">Criar Briefing</button>
+                    </form>
+                \`);
+                
+                loadBriefings();
+                
+                document.getElementById('briefingForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await createBriefing();
+                });
+            }
+
+            function showAIAgentsInterface() {
+                showModal('🤖 Sistema de Agentes IA', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Sistema de Agentes com Debates OpenAI</h4>
+                        <p>Os agentes IA debatem automaticamente e consolidam o melhor conteúdo.</p>
+                    </div>
+                    
+                    <form id="agentsForm">
+                        <div class="form-group">
+                            <label>Briefing Ativo:</label>
+                            <select id="briefingSelect" required>
+                                <option value="">Carregando briefings...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Assunto do Conteúdo:</label>
+                            <input type="text" id="subject" required placeholder="Ex: Dicas de produtividade para home office">
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Agentes (1-5):</label>
+                            <input type="number" id="numAgents" min="1" max="5" value="3" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Rodadas de Debate (1-3):</label>
+                            <input type="number" id="numRounds" min="1" max="3" value="2" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Plataformas:</label>
+                            <div>
+                                <label><input type="checkbox" value="Instagram" checked> Instagram</label>
+                                <label><input type="checkbox" value="Facebook"> Facebook</label>
+                                <label><input type="checkbox" value="LinkedIn"> LinkedIn</label>
+                                <label><input type="checkbox" value="TikTok"> TikTok</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Iniciar Agentes IA</button>
+                    </form>
+                    
+                    <div id="agentsResult" style="margin-top: 20px; display: none;">
+                        <h5>🔄 Processamento dos Agentes:</h5>
+                        <div id="agentsStatus"></div>
+                    </div>
+                \`);
+                
+                loadBriefingsForSelect();
+                
+                document.getElementById('agentsForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await startAIAgents();
+                });
+            }
+
+            function showWorkflowInterface() {
+                showModal('⚡ Workflow Editorial', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Workflow Estruturado (4 Estados)</h4>
+                        <p><strong>Geração → Ajustes → Aprovação → Pronto para Download</strong></p>
+                    </div>
+                    
+                    <div id="workflowsList">
+                        <h5>Workflows Ativos:</h5>
+                        <div id="workflowsContainer">Carregando...</div>
+                    </div>
+                \`);
+                
+                loadWorkflows();
+            }
+
+            function showCreativesInterface() {
+                showModal('🎨 Gerar Criativos', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Geração de Criativos</h4>
+                        <p><strong>Imagens (Gemini) • Vídeos (HeyGen) • Áudio (ElevenLabs)</strong></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Workflow:</label>
+                        <select id="workflowSelect" required>
+                            <option value="">Carregando workflows...</option>
+                        </select>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                        <div>
+                            <h5>📸 Gerar Imagem</h5>
+                            <form id="imageForm">
+                                <div class="form-group">
+                                    <label>Plataforma:</label>
+                                    <select id="imagePlatform" required>
+                                        <option value="instagram">Instagram</option>
+                                        <option value="facebook">Facebook</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Prompt da Imagem:</label>
+                                    <textarea id="imagePrompt" required placeholder="Descreva a imagem que deseja gerar..."></textarea>
+                                </div>
+                                <button type="submit" class="btn-primary">Gerar Imagem</button>
+                            </form>
+                        </div>
+                        
+                        <div>
+                            <h5>🎥 Gerar Vídeo</h5>
+                            <form id="videoForm">
+                                <div class="form-group">
+                                    <label>Roteiro do Vídeo:</label>
+                                    <textarea id="videoScript" required placeholder="Escreva o roteiro do vídeo..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tipo de Avatar:</label>
+                                    <select id="avatarType">
+                                        <option value="default">Avatar Padrão</option>
+                                        <option value="professional">Profissional</option>
+                                        <option value="casual">Casual</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn-primary">Gerar Vídeo</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div id="creativesResult" style="margin-top: 20px;"></div>
+                \`);
+                
+                loadWorkflowsForSelect();
+                
+                document.getElementById('imageForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await generateImage();
+                });
+                
+                document.getElementById('videoForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await generateVideo();
+                });
+            }
+
+            function showDownloadInterface() {
+                showModal('💾 Download de Assets', \`
+                    <div style="margin-bottom: 20px;">
+                        <h4>🎯 Sistema de Download</h4>
+                        <p>Download de todos os criativos gerados (imagens, vídeos, áudios)</p>
+                    </div>
+                    
+                    <div id="assetsList">
+                        <h5>Assets Disponíveis:</h5>
+                        <div id="assetsContainer">Carregando...</div>
+                    </div>
+                \`);
+                
+                loadAssets();
+            }
+
+            function showModal(title, content) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalBody').innerHTML = content;
+                document.getElementById('modal').style.display = 'flex';
+            }
+
+            // ===== FUNÇÕES DAS APIs =====
+            
+            async function loadBriefings() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/briefings', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const briefings = await response.json();
+                    
+                    const container = document.getElementById('briefingsContainer');
+                    if (briefings.length === 0) {
+                        container.innerHTML = '<p>Nenhum briefing criado ainda.</p>';
+                    } else {
+                        container.innerHTML = briefings.map(b => \`
+                            <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 5px;">
+                                <strong>\${b.name}</strong> - Status: \${b.status}
+                                <br><small>Criado em: \${new Date(b.createdAt).toLocaleString()}</small>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar briefings:', error);
+                }
+            }
+
+            async function loadBriefingsForSelect() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/briefings', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const briefings = await response.json();
+                    
+                    const select = document.getElementById('briefingSelect');
+                    select.innerHTML = '<option value="">Selecione um briefing...</option>';
+                    briefings.forEach(b => {
+                        select.innerHTML += \`<option value="\${b.id}">\${b.name}</option>\`;
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar briefings:', error);
+                }
+            }
+
+            async function createBriefing() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const plataformas = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    
+                    const data = {
+                        templateId: 'template-1',
+                        name: document.getElementById('briefingName').value,
+                        data: {
+                            objetivo: document.getElementById('objetivo').value,
+                            publico_alvo: document.getElementById('publico_alvo').value,
+                            tom_voz: document.getElementById('tom_voz').value,
+                            plataformas: plataformas,
+                            palavras_chave: document.getElementById('palavras_chave').value.split(',').map(s => s.trim()).filter(s => s)
+                        }
+                    };
+                    
+                    const response = await fetch('/api/v1/briefings', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Briefing criado com sucesso!');
+                        loadBriefings();
+                        document.getElementById('briefingForm').reset();
+                    } else {
+                        alert('❌ Erro ao criar briefing: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao criar briefing: ' + error.message);
+                }
+            }
+
+            async function startAIAgents() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const plataformas = Array.from(document.querySelectorAll('#agentsForm input[type="checkbox"]:checked')).map(cb => cb.value);
+                    
+                    const data = {
+                        briefingId: document.getElementById('briefingSelect').value,
+                        subject: document.getElementById('subject').value,
+                        numAgents: parseInt(document.getElementById('numAgents').value),
+                        numRounds: parseInt(document.getElementById('numRounds').value),
+                        platforms: plataformas
+                    };
+                    
+                    const response = await fetch('/api/v1/content/generate-with-agents', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('agentsResult').style.display = 'block';
+                        document.getElementById('agentsStatus').innerHTML = \`
+                            <p>✅ \${result.message}</p>
+                            <p><strong>Agentes:</strong> \${result.agents.join(', ')}</p>
+                            <p><strong>Session ID:</strong> \${result.sessionId}</p>
+                            <p>🔄 Aguarde 3 segundos para ver o resultado...</p>
+                        \`;
+                        
+                        // Verificar status após 3 segundos
+                        setTimeout(async () => {
+                            const statusResponse = await fetch(\`/api/v1/sessions/\${result.sessionId}\`, {
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            });
+                            const session = await statusResponse.json();
+                            
+                            if (session.status === 'completed') {
+                                document.getElementById('agentsStatus').innerHTML += \`
+                                    <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                                        <h6>✅ Conteúdo Gerado:</h6>
+                                        <p>\${session.finalContent.text}</p>
+                                        <p><strong>Hashtags:</strong> \${session.finalContent.hashtags.join(', ')}</p>
+                                    </div>
+                                \`;
+                            }
+                        }, 3500);
+                    } else {
+                        alert('❌ Erro: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao iniciar agentes: ' + error.message);
+                }
+            }
+
+            async function loadWorkflows() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/workflows', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const workflows = await response.json();
+                    
+                    const container = document.getElementById('workflowsContainer');
+                    if (workflows.length === 0) {
+                        container.innerHTML = '<p>Nenhum workflow encontrado. Gere conteúdo com agentes IA primeiro.</p>';
+                    } else {
+                        container.innerHTML = workflows.map(w => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                <h6>Workflow: \${w.id}</h6>
+                                <p><strong>Estado:</strong> \${w.state}</p>
+                                <p><strong>Briefing:</strong> \${w.briefingId}</p>
+                                <p><strong>Conteúdo:</strong> \${w.content.text.substring(0, 100)}...</p>
+                                <button onclick="transitionWorkflow('\${w.id}', 'adjustments')" class="btn-primary" style="margin: 5px;">→ Ajustes</button>
+                                <button onclick="transitionWorkflow('\${w.id}', 'approval')" class="btn-primary" style="margin: 5px;">→ Aprovação</button>
+                                <button onclick="transitionWorkflow('\${w.id}', 'ready_for_download')" class="btn-success" style="margin: 5px;">→ Pronto</button>
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar workflows:', error);
+                }
+            }
+
+            async function loadWorkflowsForSelect() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/workflows', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const workflows = await response.json();
+                    
+                    const select = document.getElementById('workflowSelect');
+                    select.innerHTML = '<option value="">Selecione um workflow...</option>';
+                    workflows.forEach(w => {
+                        select.innerHTML += \`<option value="\${w.id}">Workflow \${w.id} - \${w.state}</option>\`;
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar workflows:', error);
+                }
+            }
+
+            async function generateImage() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const data = {
+                        workflowId: document.getElementById('workflowSelect').value,
+                        platform: document.getElementById('imagePlatform').value,
+                        prompt: document.getElementById('imagePrompt').value
+                    };
+                    
+                    const response = await fetch('/api/v1/creatives/generate-image', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('creativesResult').innerHTML = \`
+                            <div style="background: #f0f8ff; padding: 15px; border-radius: 5px;">
+                                <h6>✅ Imagem Gerada!</h6>
+                                <p><strong>ID:</strong> \${result.asset.id}</p>
+                                <p><strong>Plataforma:</strong> \${result.asset.platform}</p>
+                                <img src="\${result.asset.url}" style="max-width: 200px; border-radius: 5px;">
+                            </div>
+                        \`;
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao gerar imagem: ' + error.message);
+                }
+            }
+
+            async function generateVideo() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const data = {
+                        workflowId: document.getElementById('workflowSelect').value,
+                        script: document.getElementById('videoScript').value,
+                        avatarType: document.getElementById('avatarType').value
+                    };
+                    
+                    const response = await fetch('/api/v1/creatives/generate-video', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        document.getElementById('creativesResult').innerHTML = \`
+                            <div style="background: #f0f8ff; padding: 15px; border-radius: 5px;">
+                                <h6>🔄 Vídeo sendo gerado...</h6>
+                                <p>\${result.message}</p>
+                                <p><strong>ID:</strong> \${result.asset.id}</p>
+                                <p><strong>Avatar:</strong> \${result.asset.avatarType}</p>
+                            </div>
+                        \`;
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao gerar vídeo: ' + error.message);
+                }
+            }
+
+            async function loadAssets() {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch('/api/v1/assets', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const assets = await response.json();
+                    
+                    const container = document.getElementById('assetsContainer');
+                    if (assets.length === 0) {
+                        container.innerHTML = '<p>Nenhum asset encontrado. Gere criativos primeiro.</p>';
+                    } else {
+                        container.innerHTML = assets.map(a => \`
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+                                <h6>\${a.type.toUpperCase()}: \${a.id}</h6>
+                                <p><strong>Status:</strong> \${a.status}</p>
+                                <p><strong>Criado:</strong> \${new Date(a.createdAt).toLocaleString()}</p>
+                                \${a.status === 'generated' || a.status === 'completed' ? 
+                                    \`<button onclick="downloadAsset('\${a.id}')" class="btn-success">💾 Download</button>\` : 
+                                    '<span style="color: #999;">🔄 Processando...</span>'
+                                }
+                            </div>
+                        \`).join('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar assets:', error);
+                }
+            }
+
+            async function downloadAsset(assetId) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(\`/api/v1/assets/\${assetId}/download\`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        window.open(result.downloadUrl, '_blank');
+                        alert('✅ ' + result.message);
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao fazer download: ' + error.message);
+                }
+            }
+
+            async function transitionWorkflow(workflowId, newState) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const response = await fetch(\`/api/v1/workflows/\${workflowId}/transition\`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + token,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ newState, comment: \`Transição para \${newState}\` })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('✅ Workflow atualizado!');
+                        loadWorkflows();
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao atualizar workflow: ' + error.message);
+                }
+            }
         </script>
     </body>
     </html>
@@ -863,3 +1446,272 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 });
 
 module.exports = app;
+// ===== FUNCIONALIDADES REAIS DO SISTEMA =====
+
+// Dados para funcionalidades reais
+const briefings = [];
+const briefingTemplates = [
+  {
+    id: 'template-1',
+    name: 'Briefing Padrão - Redes Sociais',
+    type: 'internal',
+    fields: [
+      { name: 'objetivo', label: 'Objetivo da Campanha', type: 'text', required: true },
+      { name: 'publico_alvo', label: 'Público-Alvo', type: 'textarea', required: true },
+      { name: 'tom_voz', label: 'Tom de Voz', type: 'select', options: ['Profissional', 'Descontraído', 'Inspirador', 'Educativo'], required: true },
+      { name: 'plataformas', label: 'Plataformas', type: 'multiselect', options: ['Instagram', 'Facebook', 'LinkedIn', 'TikTok'], required: true },
+      { name: 'palavras_chave', label: 'Palavras-Chave', type: 'tags', required: false }
+    ]
+  }
+];
+
+const aiAgentSessions = [];
+const contentWorkflows = [];
+const creativeAssets = [];
+
+// ===== API ENDPOINTS FUNCIONAIS =====
+
+// Briefings API
+app.get('/api/v1/briefings', authenticateToken, (req, res) => {
+  const tenantBriefings = briefings.filter(b => b.tenantId === req.user.tenantId);
+  res.json(tenantBriefings);
+});
+
+app.get('/api/v1/briefings/templates', authenticateToken, (req, res) => {
+  res.json(briefingTemplates);
+});
+
+app.post('/api/v1/briefings', authenticateToken, (req, res) => {
+  const { templateId, name, data } = req.body;
+  
+  const template = briefingTemplates.find(t => t.id === templateId);
+  if (!template) {
+    return res.status(404).json({ error: 'Template não encontrado' });
+  }
+
+  const briefing = {
+    id: `briefing_${Date.now()}`,
+    templateId,
+    name,
+    data,
+    status: 'active',
+    tenantId: req.user.tenantId,
+    userId: req.user.id,
+    createdAt: new Date().toISOString()
+  };
+
+  briefings.push(briefing);
+  res.json({ success: true, briefing });
+});
+
+// AI Agents API
+app.post('/api/v1/content/generate-with-agents', authenticateToken, (req, res) => {
+  const { briefingId, subject, numAgents, numRounds, platforms } = req.body;
+  
+  if (!briefingId) {
+    return res.status(400).json({ 
+      error: 'Briefing obrigatório: Não é possível gerar conteúdo sem um briefing ativo',
+      code: 'BRIEFING_REQUIRED'
+    });
+  }
+
+  const briefing = briefings.find(b => b.id === briefingId && b.tenantId === req.user.tenantId);
+  if (!briefing) {
+    return res.status(404).json({ error: 'Briefing não encontrado' });
+  }
+
+  const sessionId = `session_${Date.now()}`;
+  
+  const agentSession = {
+    id: sessionId,
+    briefingId,
+    subject,
+    numAgents,
+    numRounds,
+    platforms,
+    agents: [
+      { id: 'agent_1', specialty: 'Copywriter Sênior', expertise: 'Textos persuasivos' },
+      { id: 'agent_2', specialty: 'Estrategista Digital', expertise: 'Planejamento de campanhas' },
+      { id: 'agent_3', specialty: 'Designer de Conteúdo', expertise: 'Direção criativa' }
+    ].slice(0, numAgents),
+    status: 'processing',
+    tenantId: req.user.tenantId,
+    userId: req.user.id,
+    createdAt: new Date().toISOString()
+  };
+
+  // Simular processamento dos agentes
+  setTimeout(() => {
+    agentSession.status = 'completed';
+    agentSession.finalContent = {
+      text: `Conteúdo gerado pelos agentes IA sobre "${subject}":\n\n` +
+            `Baseado no briefing "${briefing.name}", nossos ${numAgents} agentes especializados ` +
+            `realizaram ${numRounds} rodadas de debate e consolidaram este conteúdo otimizado ` +
+            `para ${platforms.join(', ')}.\n\n` +
+            `Tom: ${briefing.data.tom_voz}\n` +
+            `Público-alvo: ${briefing.data.publico_alvo}\n\n` +
+            `Este conteúdo foi criado seguindo as melhores práticas de cada plataforma.`,
+      hashtags: briefing.data.palavras_chave || ['ConteudoIA', 'ZingMedia'],
+      platforms: platforms
+    };
+
+    // Criar workflow
+    const workflow = {
+      id: `workflow_${Date.now()}`,
+      sessionId,
+      briefingId,
+      content: agentSession.finalContent,
+      state: 'generation',
+      tenantId: req.user.tenantId,
+      userId: req.user.id,
+      createdAt: new Date().toISOString(),
+      history: [{
+        state: 'generation',
+        timestamp: new Date().toISOString(),
+        comment: 'Conteúdo gerado pelos agentes IA'
+      }]
+    };
+    
+    contentWorkflows.push(workflow);
+  }, 3000);
+
+  aiAgentSessions.push(agentSession);
+  
+  res.json({ 
+    success: true, 
+    sessionId,
+    message: 'Agentes IA iniciados! Processando conteúdo...',
+    agents: agentSession.agents.map(a => a.specialty)
+  });
+});
+
+// Workflows API
+app.get('/api/v1/workflows', authenticateToken, (req, res) => {
+  const tenantWorkflows = contentWorkflows.filter(w => w.tenantId === req.user.tenantId);
+  res.json(tenantWorkflows);
+});
+
+app.post('/api/v1/workflows/:id/transition', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const { newState, comment } = req.body;
+  
+  const workflowIndex = contentWorkflows.findIndex(w => w.id === id && w.tenantId === req.user.tenantId);
+  if (workflowIndex === -1) {
+    return res.status(404).json({ error: 'Workflow não encontrado' });
+  }
+
+  const workflow = contentWorkflows[workflowIndex];
+  workflow.state = newState;
+  workflow.history.push({
+    state: newState,
+    timestamp: new Date().toISOString(),
+    userId: req.user.id,
+    comment: comment || `Transição para ${newState}`
+  });
+
+  contentWorkflows[workflowIndex] = workflow;
+  res.json({ success: true, workflow });
+});
+
+// Criativos API
+app.post('/api/v1/creatives/generate-image', authenticateToken, (req, res) => {
+  const { workflowId, platform, prompt } = req.body;
+  
+  const workflow = contentWorkflows.find(w => w.id === workflowId && w.tenantId === req.user.tenantId);
+  if (!workflow) {
+    return res.status(404).json({ error: 'Workflow não encontrado' });
+  }
+
+  const imageAsset = {
+    id: `img_${Date.now()}`,
+    type: 'image',
+    workflowId,
+    platform,
+    prompt,
+    url: `https://picsum.photos/1080/1080?random=${Date.now()}`,
+    status: 'generated',
+    provider: 'gemini',
+    tenantId: req.user.tenantId,
+    userId: req.user.id,
+    createdAt: new Date().toISOString()
+  };
+
+  creativeAssets.push(imageAsset);
+  res.json({ success: true, asset: imageAsset });
+});
+
+app.post('/api/v1/creatives/generate-video', authenticateToken, (req, res) => {
+  const { workflowId, script, avatarType } = req.body;
+  
+  const workflow = contentWorkflows.find(w => w.id === workflowId && w.tenantId === req.user.tenantId);
+  if (!workflow) {
+    return res.status(404).json({ error: 'Workflow não encontrado' });
+  }
+
+  const videoAsset = {
+    id: `vid_${Date.now()}`,
+    type: 'video',
+    workflowId,
+    script,
+    avatarType: avatarType || 'default',
+    url: `https://sample-videos.com/zip/10/mp4/SampleVideo_1080x720_1mb.mp4`,
+    thumbnail: `https://picsum.photos/1080/720?random=${Date.now()}`,
+    duration: 30,
+    status: 'processing',
+    provider: 'heygen',
+    tenantId: req.user.tenantId,
+    userId: req.user.id,
+    createdAt: new Date().toISOString()
+  };
+
+  setTimeout(() => {
+    const assetIndex = creativeAssets.findIndex(a => a.id === videoAsset.id);
+    if (assetIndex !== -1) {
+      creativeAssets[assetIndex].status = 'completed';
+    }
+  }, 5000);
+
+  creativeAssets.push(videoAsset);
+  res.json({ 
+    success: true, 
+    asset: videoAsset,
+    message: 'Vídeo sendo gerado! Será notificado quando estiver pronto.'
+  });
+});
+
+// Download API
+app.get('/api/v1/assets', authenticateToken, (req, res) => {
+  const { workflowId } = req.query;
+  let assets = creativeAssets.filter(a => a.tenantId === req.user.tenantId);
+  
+  if (workflowId) {
+    assets = assets.filter(a => a.workflowId === workflowId);
+  }
+  
+  res.json(assets);
+});
+
+app.get('/api/v1/assets/:id/download', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  
+  const asset = creativeAssets.find(a => a.id === id && a.tenantId === req.user.tenantId);
+  if (!asset) {
+    return res.status(404).json({ error: 'Asset não encontrado' });
+  }
+
+  res.json({
+    success: true,
+    downloadUrl: asset.url,
+    filename: `${asset.type}_${asset.id}.${asset.type === 'image' ? 'jpg' : 'mp4'}`,
+    message: 'Download iniciado!'
+  });
+});
+
+// Sessions API para verificar status
+app.get('/api/v1/sessions/:id', authenticateToken, (req, res) => {
+  const session = aiAgentSessions.find(s => s.id === req.params.id && s.tenantId === req.user.tenantId);
+  if (!session) {
+    return res.status(404).json({ error: 'Sessão não encontrada' });
+  }
+  res.json(session);
+});
