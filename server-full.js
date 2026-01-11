@@ -9,6 +9,12 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Log environment info for debugging
+console.log('🔧 Environment Info:');
+console.log(`   NODE_ENV: ${NODE_ENV}`);
+console.log(`   PORT: ${PORT}`);
+console.log(`   Railway Environment: ${process.env.RAILWAY_ENVIRONMENT || 'not detected'}`);
+
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
@@ -1237,11 +1243,23 @@ app.get('/api/v1/content/posts', authenticateToken, (req, res) => {
   res.json(tenantPosts);
 });
 
+// Health check endpoints for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 'ZingMedia'
+  });
+});
+
 app.get('/api/v1/health', (req, res) => {
-  res.json({
+  res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
+    service: 'ZingMedia',
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
     services: {
       authentication: 'ok',
       database: 'simulated',
@@ -1250,7 +1268,30 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Additional health endpoints
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
+
+app.get('/_health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+// Middleware de tratamento de erros
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Middleware para rotas não encontradas
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 ZingMedia server started successfully on port ${PORT}`);
+  console.log(`📍 Health check available at: http://localhost:${PORT}/health`);
+  
   if (NODE_ENV === 'development') {
     console.log(`
 🚀 ZingMedia (Versão Completa) está rodando!
@@ -1267,8 +1308,26 @@ app.listen(PORT, '0.0.0.0', () => {
 ✨ Abra seu navegador e faça login para acessar o dashboard!
     `);
   } else {
-    console.log(`🚀 ZingMedia rodando na porta ${PORT}`);
+    console.log(`🚀 ZingMedia rodando na porta ${PORT} em modo ${NODE_ENV}`);
   }
+}).on('error', (err) => {
+  console.error('❌ Erro ao iniciar servidor:', err);
+  process.exit(1);
+});
+
+// Tratamento de sinais para graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    console.log('Process terminated');
+  });
 });
 
 function getLocalIP() {
